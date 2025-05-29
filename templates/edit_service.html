@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Layanan ServisGo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <div class="container navbar">
+         <a href="
+    {% if session.get('user_id') %}
+        {% if session.get('role') == 'mechanic' %}/mechanic_dashboard
+        {% elif session.get('role') == 'admin' %}/admin_dashboard
+        {% elif session.get('role') == 'master' %}/master_dashboard
+        {% else %}/dashboard {# Default untuk user biasa #}
+        {% endif %}
+    {% else %}/ {# Default jika belum login, ke beranda umum #}
+    {% endif %}
+" class="logo">
+    <img src="{{ url_for('static', filename='images/logo_servisgo.png') }}" alt="ServisGo Logo" class="logo-img"> <span>SERVISGO</span>
+</a>
+          <nav>
+    <ul class="nav-links">
+        {# Link Beranda hanya jika belum login ATAU perannya adalah 'user' #}
+        {% if not session.get('user_id') or session.get('role') == 'user' %}
+            <li><a href="/">Beranda</a></li>
+        {% endif %}
+        
+        {# Dropdown Utama "Layanan & Info" untuk SEMUA yang Sudah Login #}
+        {% if session.get('user_id') %}
+            <li class="dropdown">
+                <a href="#" class="dropbtn" onclick="toggleDropdown(event, 'main-menu-dropdown')">Layanan & Info <span class="arrow">▼</span></a>
+                <div class="dropdown-content" id="main-menu-dropdown">
+                    {# Link yang SELALU ada di dalam dropdown untuk yang login (kecuali kondisi khusus) #}
+                    <a href="/layanan">Layanan</a>
+                    <a href="#">Tentang Kami</a> {# Sesuaikan href jika halaman Tentang Kami sudah dibuat #}
+
+                    {# Link spesifik berdasarkan peran di dalam dropdown #}
+                    {% if session.get('role') == 'user' %}
+                        <a href="/booking">Booking Servis</a>
+                    {% elif session.get('role') == 'admin' %}
+                        {# KHUSUS ADMIN: Daftar Mekanik di sini #}
+                        <a href="/register_mechanic">Daftar Mekanik</a>
+                    {% elif session.get('role') == 'master' %}
+                        {# MASTER punya semua link manajemen di sini #}
+                        <a href="/manage_services">Manajemen Layanan</a>
+                        <a href="/register_admin">Daftar Admin</a>
+                        <a href="/register_mechanic">Daftar Mekanik</a>
+                    {% endif %}
+                </div>
+            </li>
+        {% else %} {# Jika belum login, tampilkan Layanan & Tentang Kami secara terpisah #}
+            <li><a href="/layanan">Layanan</a></li>
+            <li><a href="#">Tentang Kami</a></li>
+        {% endif %}
+
+        {# Link Dashboard Spesifik Peran (di luar dropdown "Layanan & Info") #}
+        {% if session.get('username') %}
+            {% if session.get('role') == 'master' %}
+                <li><a href="/master_dashboard">Dashboard Master</a></li>
+                {# Manajemen dropdown untuk Master TIDAK ADA LAGI DI SINI, semua masuk ke "Layanan & Info" #}
+            {% elif session.get('role') == 'admin' %}
+                <li><a href="/admin_dashboard">Dashboard Admin</a></li>
+                {# Admin tidak punya link Daftar Mekanik terpisah lagi di sini #}
+            {% elif session.get('role') == 'mechanic' %}
+                <li><a href="/mechanic_dashboard">Dashboard Mekanik</a></li>
+                <li><a href="/mechanic_history" class="nav-btn">Riwayat Servis</a></li>
+            {% else %} {# user biasa #}
+                <li><a href="/dashboard">Dashboard Saya</a></li>
+            {% endif %}
+
+            {# Lonceng Notifikasi untuk semua peran yang login #}
+            <li id="notification-bell">
+                <a href="#" onclick="toggleNotifications()">
+                    🔔
+                    {# Hitung notifikasi belum dibaca #}
+                    {% set unread_count = notifications | selectattr('is_read', '==', 0) | list | length %}
+                    {% if unread_count > 0 %}
+                        <span class="notification-count">{{ unread_count }}</span>
+                    {% endif %}
+                </a>
+                <div id="notification-dropdown" class="notification-dropdown">
+                    <h3>Notifikasi Anda</h3>
+                    {% if notifications %}
+                        {% for notif in notifications %}
+                            <div class="dropdown-item {% if notif.is_read == 0 %}unread-dropdown{% endif %}">
+                                <span class="dropdown-message">{{ notif.message }}</span>
+                                <span class="dropdown-timestamp">{{ notif.created_at }}</span>
+                                {% if notif.is_read == 0 %}
+                                    <button class="mark-read-dropdown" data-id="{{ notif.id }}">Tandai Dibaca</button>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="no-notifications-dropdown">Tidak ada notifikasi.</p>
+                    {% endif %}
+                </div>
+            </li>
+            <li><a href="/logout">Logout ({{ session.username }})</a></li>
+        {% else %}
+            <li><a href="/login">Masuk/Daftar</a></li>
+        {% endif %}
+    </ul>
+</nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <div class="edit-service-form-container">
+                <h1>Edit Layanan: {{ service.name }}</h1>
+                <form action="{{ url_for('edit_service', service_id=service.id) }}" method="POST">
+                    <div class="form-group">
+                        <label for="name">Nama Layanan:</label>
+                        <input type="text" id="name" name="name" value="{{ service.name }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Deskripsi:</label>
+                        <textarea id="description" name="description" required>{{ service.description }}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="price">Harga (Rp):</label>
+                        <input type="number" id="price" name="price" step="any" min="0" value="{{ service.price }}" required>
+                    </div>
+                    <button type="submit">Perbarui Layanan</button>
+                </form>
+                <a href="{{ url_for('manage_services') }}" class="back-link">Kembali ke Manajemen Layanan</a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // JavaScript for dropdown (Manajemen menu for Master)
+       // JavaScript for dropdown (Manajemen menu for Master & User general menu)
+function toggleDropdown(event, dropdownId) {
+    event.preventDefault(); // Mencegah link navigasi default
+    const currentDropdown = document.getElementById(dropdownId);
+
+    // Tutup semua dropdown lain
+    document.querySelectorAll('.dropdown-content').forEach(dropdown => {
+        if (dropdown.id !== dropdownId) { // Jangan tutup dropdown yang sedang dibuka
+            dropdown.style.display = 'none';
+        }
+    });
+
+    // Toggle (buka/tutup) dropdown yang diklik
+    currentDropdown.style.display = currentDropdown.style.display === 'block' ? 'none' : 'block';
+}
+
+// Close all dropdowns if the user clicks outside of them
+window.onclick = function(event) {
+    // Check if the click is outside any specific dropdown trigger or content
+    // Ini menangani notifikasi lonceng
+    const notificationBell = document.getElementById('notification-bell');
+    const notificationDropdown = document.getElementById('notification-dropdown');
+    if (notificationDropdown && notificationDropdown.style.display === 'block' && 
+        !notificationBell.contains(event.target)) { // contains mengecek apakah target adalah child dari bell
+        notificationDropdown.style.display = 'none';
+    }
+
+    // Ini menangani semua dropdown menu navigasi (.dropbtn triggers, .dropdown-content)
+    const dropbtns = document.querySelectorAll('.dropbtn');
+    const dropdownContents = document.querySelectorAll('.dropdown-content');
+
+    // Tutup semua dropdown navigasi jika klik di luar tombol atau konten dropdown
+    let clickedInsideAnyDropdown = false;
+    for (let i = 0; i < dropbtns.length; i++) {
+        if (dropbtns[i].contains(event.target)) { // Klik pada dropbtn
+            clickedInsideAnyDropdown = true;
+            break;
+        }
+    }
+    for (let i = 0; i < dropdownContents.length; i++) {
+        if (dropdownContents[i].contains(event.target)) { // Klik pada konten dropdown
+            clickedInsideAnyDropdown = true;
+            break;
+        }
+    }
+
+    if (!clickedInsideAnyDropdown) {
+        for (let i = 0; i < dropdownContents.length; i++) {
+            dropdownContents[i].style.display = 'none';
+        }
+    }
+}
+
+// JavaScript for marking notifications as read (main content & dropdown)
+document.querySelectorAll('.mark-read-btn, .mark-read-dropdown').forEach(button => {
+    button.addEventListener('click', function() {
+        const notificationId = this.dataset.id;
+        
+        fetch(`/mark_notification_read/${notificationId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const mainNotificationItem = document.querySelector(`.notification-item[data-id="${notificationId}"]`); 
+                if (mainNotificationItem) {
+                    mainNotificationItem.classList.remove('unread');
+                    const mainButton = mainNotificationItem.querySelector('.mark-read-btn');
+                    if (mainButton) mainButton.remove();
+                }
+                
+                const dropdownItem = document.querySelector(`#notification-dropdown .dropdown-item[data-id="${notificationId}"]`);
+                if (dropdownItem) {
+                    dropdownItem.classList.remove('unread-dropdown');
+                    const dropdownButton = dropdownItem.querySelector('.mark-read-dropdown');
+                    if (dropdownButton) dropdownButton.remove();
+                }
+                
+                const notificationCountSpan = document.querySelector('.notification-count');
+                if (notificationCountSpan) {
+                    let currentCount = parseInt(notificationCountSpan.textContent);
+                    currentCount--;
+                    if (currentCount > 0) {
+                        notificationCountSpan.textContent = currentCount;
+                    } else {
+                        notificationCountSpan.remove();
+                    }
+                }
+            } else {
+                alert('Gagal menandai notifikasi: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan jaringan.');
+        });
+    });
+});
+    </script>
+</body>
+</html>

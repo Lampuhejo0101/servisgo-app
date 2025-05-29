@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Layanan ServisGo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* Specific styles for manage_services */
+        .add-service-form-container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+            max-width: 600px;
+            margin: 40px auto;
+        }
+        .add-service-form-container h2 {
+            margin-top: 0;
+            margin-bottom: 25px;
+            font-size: 28px;
+            color: #333;
+            text-align: center;
+        }
+        .add-service-form-container .form-group {
+            margin-bottom: 15px;
+        }
+        .add-service-form-container label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        .add-service-form-container input[type="text"],
+        .add-service-form-container input[type="number"],
+        .add-service-form-container textarea {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        .add-service-form-container textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        .add-service-form-container button[type="submit"] {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 18px;
+            width: 100%;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+        .add-service-form-container button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        .service-list-section {
+            margin-top: 60px;
+            text-align: center;
+        }
+        .service-list-section h2 {
+            margin-bottom: 25px;
+        }
+        .service-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center; /* Center buttons */
+        }
+        .service-actions .btn-edit, .service-actions .btn-delete {
+            padding: 8px 12px;
+            border-radius: 5px;
+            text-decoration: none;
+            color: white;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+        .service-actions .btn-edit {
+            background-color: #17a2b8; /* Info blue */
+        }
+        .service-actions .btn-edit:hover {
+            background-color: #138496;
+        }
+        .service-actions .btn-delete {
+            background-color: #dc3545; /* Danger red */
+        }
+        .service-actions .btn-delete:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container navbar">
+          <a href="
+    {% if session.get('user_id') %}
+        {% if session.get('role') == 'mechanic' %}/mechanic_dashboard
+        {% elif session.get('role') == 'admin' %}/admin_dashboard
+        {% elif session.get('role') == 'master' %}/master_dashboard
+        {% else %}/dashboard {# Default untuk user biasa #}
+        {% endif %}
+    {% else %}/ {# Default jika belum login, ke beranda umum #}
+    {% endif %}
+" class="logo">
+    <img src="{{ url_for('static', filename='images/logo_servisgo.png') }}" alt="ServisGo Logo" class="logo-img"> <span>SERVISGO</span>
+</a>
+        <nav>
+    <ul class="nav-links">
+        {# Link Beranda hanya jika belum login ATAU perannya adalah 'user' #}
+        {% if not session.get('user_id') or session.get('role') == 'user' %}
+            <li><a href="/">Beranda</a></li>
+        {% endif %}
+        
+        {# Dropdown Utama "Layanan & Info" untuk SEMUA yang Sudah Login #}
+        {% if session.get('user_id') %}
+            <li class="dropdown">
+                <a href="#" class="dropbtn" onclick="toggleDropdown(event, 'main-menu-dropdown')">Layanan & Info <span class="arrow">▼</span></a>
+                <div class="dropdown-content" id="main-menu-dropdown">
+                    {# Link yang SELALU ada di dalam dropdown untuk yang login (kecuali kondisi khusus) #}
+                    <a href="/layanan">Layanan</a>
+                    <a href="#">Tentang Kami</a> {# Sesuaikan href jika halaman Tentang Kami sudah dibuat #}
+
+                    {# Link spesifik berdasarkan peran di dalam dropdown #}
+                    {% if session.get('role') == 'user' %}
+                        <a href="/booking">Booking Servis</a>
+                    {% elif session.get('role') == 'admin' %}
+                        {# KHUSUS ADMIN: Daftar Mekanik di sini #}
+                        <a href="/register_mechanic">Daftar Mekanik</a>
+                    {% elif session.get('role') == 'master' %}
+                        {# MASTER punya semua link manajemen di sini #}
+                        <a href="/manage_services">Manajemen Layanan</a>
+                        <a href="/register_admin">Daftar Admin</a>
+                        <a href="/register_mechanic">Daftar Mekanik</a>
+                    {% endif %}
+                </div>
+            </li>
+        {% else %} {# Jika belum login, tampilkan Layanan & Tentang Kami secara terpisah #}
+            <li><a href="/layanan">Layanan</a></li>
+            <li><a href="#">Tentang Kami</a></li>
+        {% endif %}
+
+        {# Link Dashboard Spesifik Peran (di luar dropdown "Layanan & Info") #}
+        {% if session.get('username') %}
+            {% if session.get('role') == 'master' %}
+                <li><a href="/master_dashboard">Dashboard Master</a></li>
+                {# Manajemen dropdown untuk Master TIDAK ADA LAGI DI SINI, semua masuk ke "Layanan & Info" #}
+            {% elif session.get('role') == 'admin' %}
+                <li><a href="/admin_dashboard">Dashboard Admin</a></li>
+                {# Admin tidak punya link Daftar Mekanik terpisah lagi di sini #}
+            {% elif session.get('role') == 'mechanic' %}
+                <li><a href="/mechanic_dashboard">Dashboard Mekanik</a></li>
+                <li><a href="/mechanic_history" class="nav-btn">Riwayat Servis</a></li>
+            {% else %} {# user biasa #}
+                <li><a href="/dashboard">Dashboard Saya</a></li>
+            {% endif %}
+
+            {# Lonceng Notifikasi untuk semua peran yang login #}
+            <li id="notification-bell">
+                <a href="#" onclick="toggleNotifications()">
+                    🔔
+                    {# Hitung notifikasi belum dibaca #}
+                    {% set unread_count = notifications | selectattr('is_read', '==', 0) | list | length %}
+                    {% if unread_count > 0 %}
+                        <span class="notification-count">{{ unread_count }}</span>
+                    {% endif %}
+                </a>
+                <div id="notification-dropdown" class="notification-dropdown">
+                    <h3>Notifikasi Anda</h3>
+                    {% if notifications %}
+                        {% for notif in notifications %}
+                            <div class="dropdown-item {% if notif.is_read == 0 %}unread-dropdown{% endif %}">
+                                <span class="dropdown-message">{{ notif.message }}</span>
+                                <span class="dropdown-timestamp">{{ notif.created_at }}</span>
+                                {% if notif.is_read == 0 %}
+                                    <button class="mark-read-dropdown" data-id="{{ notif.id }}">Tandai Dibaca</button>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="no-notifications-dropdown">Tidak ada notifikasi.</p>
+                    {% endif %}
+                </div>
+            </li>
+            <li><a href="/logout">Logout ({{ session.username }})</a></li>
+        {% else %}
+            <li><a href="/login">Masuk/Daftar</a></li>
+        {% endif %}
+    </ul>
+</nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <h1>Manajemen Layanan</h1>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <div class="add-service-form-container">
+                <h2>Tambah Layanan Baru</h2>
+                <form action="{{ url_for('manage_services') }}" method="POST">
+                    <div class="form-group">
+                        <label for="name">Nama Layanan:</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Deskripsi:</label>
+                        <textarea id="description" name="description" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="price">Harga (Rp):</label>
+                        <input type="number" id="price" name="price" step="any" min="0" required>
+                    </div>
+                    <button type="submit">Tambah Layanan</button>
+                </form>
+            </div>
+
+            <div class="service-list-section">
+                <h2>Daftar Layanan Saat Ini</h2>
+                {% if services %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nama</th>
+                                <th>Deskripsi</th>
+                                <th>Harga</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for service in services %}
+                                <tr>
+                                    <td>{{ service.id }}</td>
+                                    <td>{{ service.name }}</td>
+                                    <td>{{ service.description }}</td>
+                                    <td>Rp {{ "{:,.0f}".format(service.price) }}</td>
+                                    <td class="service-actions">
+                                        <a href="{{ url_for('edit_service', service_id=service.id) }}" class="btn-edit">Edit</a>
+                                        <form action="{{ url_for('delete_service', service_id=service.id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus layanan ini?');">
+                                            <button type="submit" class="btn-delete">Hapus</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>Belum ada layanan yang terdaftar. Tambahkan yang pertama!</p>
+                {% endif %}
+            </div>
+
+        </div>
+    </main>
+
+</body>
+</html>

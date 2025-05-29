@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Mekanik ServisGo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <div class="container navbar">
+            <a href="
+                {% if session.get('user_id') %}
+                    {% if session.get('role') == 'mechanic' %}/mechanic_dashboard
+                    {% elif session.get('role') == 'admin' %}/admin_dashboard
+                    {% elif session.get('role') == 'master' %}/master_dashboard
+                    {% else %}/dashboard
+                    {% endif %}
+                {% else %}/
+                {% endif %}
+            " class="logo">
+                <img src="{{ url_for('static', filename='images/logo_servisgo.png') }}" alt="ServisGo Logo" class="logo-img"> <span>SERVISGO</span>
+            </a>
+            <nav>
+                <ul class="nav-links">
+                    {# Link Beranda hanya jika belum login ATAU perannya adalah 'user' #}
+                    {% if not session.get('user_id') or session.get('role') == 'user' %}
+                        <li><a href="/">Beranda</a></li>
+                    {% endif %}
+                    
+                    {# Dropdown Utama "Layanan & Info" untuk SEMUA yang Sudah Login #}
+                    {% if session.get('user_id') %}
+                        <li class="dropdown">
+                            <a href="#" class="dropbtn" onclick="toggleDropdown(event, 'main-menu-dropdown')">Layanan & Info <span class="arrow">▼</span></a>
+                            <div class="dropdown-content" id="main-menu-dropdown">
+                                <a href="/layanan">Layanan</a>
+                                <a href="#">Tentang Kami</a>
+                                {% if session.get('role') == 'user' %}
+                                    <a href="/booking">Booking Servis</a>
+                                {% elif session.get('role') == 'admin' %}
+                                    <a href="/register_mechanic">Daftar Mekanik</a>
+                                {% elif session.get('role') == 'master' %}
+                                    <a href="/manage_services">Manajemen Layanan</a>
+                                    <a href="/register_admin">Daftar Admin</a>
+                                    <a href="/register_mechanic">Daftar Mekanik</a>
+                                {% endif %}
+                            </div>
+                        </li>
+                    {% else %}
+                        <li><a href="/layanan">Layanan</a></li>
+                        <li><a href="#">Tentang Kami</a></li>
+                    {% endif %}
+
+                    {# Link Dashboard Spesifik Peran #}
+                    {% if session.get('username') %}
+                        {% if session.get('role') == 'master' %}
+                            <li><a href="/master_dashboard">Dashboard Master</a></li>
+                        {% elif session.get('role') == 'admin' %}
+                            <li><a href="/admin_dashboard">Dashboard Admin</a></li>
+                        {% elif session.get('role') == 'mechanic' %}
+                            <li><a href="/mechanic_dashboard">Dashboard Mekanik</a></li>
+                            <li><a href="/mechanic_history" class="nav-btn">Riwayat Servis</a></li>
+                        {% else %}
+                            <li><a href="/dashboard">Dashboard Saya</a></li>
+                        {% endif %}
+
+                        {# Lonceng Notifikasi #}
+                        <li id="notification-bell">
+                            <a href="#" onclick="toggleNotifications()">
+                                🔔
+                                {% set unread_count = notifications | selectattr('is_read', '==', 0) | list | length %}
+                                {% if unread_count > 0 %}
+                                    <span class="notification-count">{{ unread_count }}</span>
+                                {% endif %}
+                            </a>
+                            <div id="notification-dropdown" class="notification-dropdown">
+                                <h3>Notifikasi Anda</h3>
+                                {% if notifications %}
+                                    {% for notif in notifications %}
+                                        <div class="dropdown-item {% if notif.is_read == 0 %}unread-dropdown{% endif %}" data-id="{{ notif.id }}" data-booking-id="{{ notif.booking_id }}">
+                                            <span class="dropdown-message">{{ notif.message }}</span>
+                                            <span class="dropdown-timestamp">{{ notif.created_at }}</span>
+                                            {% if notif.is_read == 0 %}
+                                                <button class="mark-read-dropdown" data-id="{{ notif.id }}">Tandai Dibaca</button>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="no-notifications-dropdown">Tidak ada notifikasi.</p>
+                                {% endif %}
+                            </div>
+                        </li>
+                        <li><a href="/logout">Logout ({{ session.username }})</a></li>
+                    {% else %}
+                        <li><a href="/login">Masuk/Daftar</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <h1></h1>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+          {# Pembungkus Utama untuk Profil dan Sampul #}
+            <div class="user-profile-wrapper" style="background-image: url('{{ url_for('static', filename='cover_pics/' + cover_picture) }}');">
+                <div class="cover-overlay"></div>
+                
+                <div class="profile-section">
+                    {# Foto Profil Lingkaran (kini di pojok kiri bawah profile-section) #}
+                    <div class="profile-pic-container">
+                        <img src="{{ url_for('static', filename='profile_pics/' + profile_picture) }}" alt="Foto Profil">
+                    </div>
+
+                    {# Kontainer untuk Nama, Peran, dan Form Upload Foto Profil #}
+                    <div class="profile-info-wrapper"> {# BARU: Kontainer ini membungkus teks dan form upload #}
+                        <div class="profile-info"> {# Ini hanya untuk username dan role #}
+                            <p class="profile-username">Halo, {{ session.username }}!</p>
+                            <p class="profile-role">Peran: {{ session.role | capitalize }}</p>
+                        </div>
+                        
+                        {# Form upload foto profil (di dalam profile-info-wrapper) #}
+                        <form action="{{ url_for('upload_profile_pic') }}" method="POST" enctype="multipart/form-data" class="profile-upload-form">
+                            <label for="profile_file" class="profile-upload-label">Ubah Foto Profil</label>
+                            <input type="file" name="file" id="profile_file" accept="image/png, image/jpeg, image/gif">
+                            <button type="submit" class="profile-upload-button">Unggah Foto</button>
+                        </form>
+                    </div>
+                </div>
+
+                {# Form upload foto sampul (di dalam user-profile-wrapper, posisi absolut di pojok kanan atas) #}
+                <form action="{{ url_for('upload_cover_pic') }}" method="POST" enctype="multipart/form-data" class="cover-upload-form">
+                    <label for="cover_file" class="cover-upload-label">Ubah Sampul</label>
+                    <input type="file" name="file" id="cover_file" accept="image/png, image/jpeg, image/gif">
+                    <button type="submit" class="cover-upload-button">Unggah</button>
+                </form>
+            </div>
+
+            {# ... (sisa konten dashboard seperti Tab Navigation, Servis Baru, Servis Saya) ... #}
+
+            {# ... (sisa konten dashboard seperti Tab Navigation, Servis Baru, Servis Saya) ... #}
+            
+            {# ... (sisa konten dashboard) ... #}
+            
+            {# NAVIGASI TAB #}
+            <div class="tab-navigation">
+                <button class="tab-button active" onclick="openTab(event, 'new-bookings')">Servis Baru</button>
+                <button class="tab-button" onclick="openTab(event, 'my-bookings')">Servis Saya</button>
+            </div>
+
+            {# KONTEN TAB: Servis Baru (Belum Ditangani) #}
+            <div id="new-bookings" class="tab-content active">
+                <h2 class="tab-title">Servis Baru (Belum Ditangani)</h2>
+                {% if pending_bookings_unassigned %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID Booking</th>
+                                <th>Pengguna</th>
+                                <th>Layanan</th>
+                                <th>Tanggal & Jam</th>
+                                <th>Lokasi</th>
+                                <th>Keterangan</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for booking in pending_bookings_unassigned %}
+                                <tr>
+                                    <td>{{ booking.id }}</td>
+                                    <td>{{ booking.username }} ({{ booking.email }})</td>
+                                    <td>{{ booking.layanan }}</td>
+                                    <td>{{ booking.tanggal }} {% if booking.jam %} {{ booking.jam }} {% endif %}</td>
+                                    <td>
+                                        {{ booking.lokasi_servis }}
+                                        {% if booking.lokasi_servis == 'Datang ke Rumah' and booking.alamat %}
+                                            <br>({{ booking.alamat }})
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ booking.keterangan | default('Tidak ada', true) }}</td>
+                                    <td><span class="status-badge status-{{ booking.status | replace(' ', '') }}">{{ booking.status }}</span></td>
+                                    <td>
+                                        <form action="{{ url_for('update_booking_status', booking_id=booking.id) }}" method="POST" class="status-form">
+                                            <select name="status">
+                                                <option value="Confirmed" {% if booking.status == 'Confirmed' %}selected{% endif %}>Konfirmasi & Ambil</option>
+                                                <option value="Cancelled">Batalkan</option>
+                                            </select>
+                                            <button type="submit">Update</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>Tidak ada servis baru yang perlu ditangani saat ini.</p>
+                {% endif %}
+            </div>
+
+            {# KONTEN TAB: Servis Saya (Terkonfirmasi & Sedang Berjalan) #}
+            <div id="my-bookings" class="tab-content">
+                <h2 class="tab-title">Servis Saya (Terkonfirmasi & Sedang Berjalan)</h2>
+                {% if assigned_and_in_progress_bookings %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID Booking</th>
+                                <th>Pengguna</th>
+                                <th>Layanan</th>
+                                <th>Tanggal & Jam</th>
+                                <th>Lokasi</th>
+                                <th>Keterangan</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for booking in assigned_and_in_progress_bookings %}
+                                <tr>
+                                    <td>{{ booking.id }}</td>
+                                    <td>{{ booking.username }} ({{ booking.email }})</td>
+                                    <td>{{ booking.layanan }}</td>
+                                    <td>{{ booking.tanggal }} {% if booking.jam %} {{ booking.jam }} {% endif %}</td>
+                                    <td>
+                                        {{ booking.lokasi_servis }}
+                                        {% if booking.lokasi_servis == 'Datang ke Rumah' and booking.alamat %}
+                                            <br>({{ booking.alamat }})
+                                        {% endif %}
+                                    </td>
+                                    <td><span class="status-badge status-{{ booking.status | replace(' ', '') }}">{{ booking.status }}</span></td>
+                                    <td>
+                                        <form action="{{ url_for('update_booking_status', booking_id=booking.id) }}" method="POST" class="status-form">
+                                            <select name="status">
+                                                <option value="Confirmed" {% if booking.status == 'Confirmed' %}selected{% endif %}>Sudah Konfirmasi</option>
+                                                <option value="In Progress" {% if booking.status == 'In Progress' %}selected{% endif %}>Mulai Dikerjakan</option>
+                                                <option value="Completed">Selesai</option>
+                                                <option value="Cancelled">Batalkan</option>
+                                                <option value="Pending">Kembalikan ke Baru</option>
+                                            </select>
+                                            <button type="submit">Update</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>Tidak ada servis yang sudah Anda tangani atau sedang berjalan.</p>
+                {% endif %}
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // JavaScript for notification bell
+        function toggleNotifications() {
+            const dropdown = document.getElementById('notification-dropdown');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // JavaScript for dropdown (Manajemen menu for Master & User general menu)
+        function toggleDropdown(event, dropdownId) {
+            event.preventDefault();
+            const currentDropdown = document.getElementById(dropdownId);
+
+            document.querySelectorAll('.dropdown-content').forEach(dropdown => {
+                if (dropdown.id !== dropdownId) {
+                    dropdown.style.display = 'none';
+                }
+            });
+
+            currentDropdown.style.display = currentDropdown.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // Close all dropdowns if the user clicks outside of them
+        window.onclick = function(event) {
+            const notificationDropdown = document.getElementById('notification-dropdown');
+            const notificationBell = document.getElementById('notification-bell');
+            if (notificationDropdown && notificationDropdown.style.display === 'block' && 
+                notificationBell && !notificationBell.contains(event.target)) {
+                notificationDropdown.style.display = 'none';
+            }
+
+            const managementDropdowns = document.getElementsByClassName('dropdown-content');
+            const dropbtns = document.querySelectorAll('.dropbtn');
+
+            let clickedInsideAnyDropdown = false;
+            for (let i = 0; i < dropbtns.length; i++) {
+                if (dropbtns[i].contains(event.target)) {
+                    clickedInsideAnyDropdown = true;
+                    break;
+                }
+            }
+            if (!clickedInsideAnyDropdown) {
+                for (let i = 0; i < managementDropdowns.length; i++) {
+                    if (managementDropdowns[i].contains(event.target)) {
+                        clickedInsideAnyDropdown = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!clickedInsideAnyDropdown) {
+                for (let i = 0; i < managementDropdowns.length; i++) {
+                    managementDropdowns[i].style.display = 'none';
+                }
+            }
+        }
+
+        // === JavaScript for Tab Navigation ===
+        function openTab(evt, tabName) {
+            let i, tabContent, tabButtons;
+
+            tabContent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabContent.length; i++) {
+                tabContent[i].style.display = "none";
+            }
+
+            tabButtons = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].className = tabButtons[i].className.replace(" active", "");
+            }
+
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+
+        // Set default active tab on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlHash = window.location.hash;
+            if (urlHash && urlHash.startsWith('#')) {
+                const targetTab = urlHash.substring(1);
+                const tabButton = document.querySelector(`.tab-button[onclick*='${targetTab}']`);
+                if (tabButton) {
+                    tabButton.click();
+                } else {
+                    document.querySelector('.tab-button').click();
+                }
+            } else {
+                document.querySelector('.tab-button').click();
+            }
+        });
+
+        // === JavaScript untuk Modal Notifikasi & Mark as Read ===
+        const mechanicDetailModal = document.getElementById('mechanicDetailModal');
+        const closeButton = document.querySelector('.close-button');
+        const modalMechanicPhoto = document.getElementById('modalMechanicPhoto');
+        const modalMechanicName = document.getElementById('modalMechanicName');
+        const modalInstructionMessage = document.getElementById('modalInstructionMessage');
+        const modalBookingService = document.getElementById('modalBookingService');
+        const modalBookingStatus = document.getElementById('modalBookingStatus');
+        const modalMarkReadBtn = document.getElementById('modalMarkReadBtn');
+
+        let currentNotificationId = null; 
+
+        // Fungsi untuk menandai notifikasi sudah dibaca
+        function markNotificationAsRead(notificationIdToMark) {
+            fetch(`/mark_notification_read/${notificationIdToMark}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({})
+            })
+            .then(response => {
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    return response.json();
+                } else {
+                    return response.text().then(text => {
+                        console.error("Server responded with non-JSON for mark as read:", text);
+                        throw new Error("Server response for mark as read was not JSON: " + text);
+                    });
+                }
+            })
+            .then(data => {
+                if (data.success) {
+                    const dropdownItem = document.querySelector(`#notification-dropdown .dropdown-item[data-id="${notificationIdToMark}"]`);
+                    if (dropdownItem) {
+                        dropdownItem.remove();
+                    }
+                    
+                    const notificationCountSpan = document.querySelector('.notification-count');
+                    if (notificationCountSpan) {
+                        let currentCount = parseInt(notificationCountSpan.textContent);
+                        currentCount--;
+                        if (currentCount > 0) {
+                            notificationCountSpan.textContent = currentCount;
+                        } else {
+                            notificationCountSpan.remove();
+                        }
+                    }
+                } else {
+                    alert('Gagal menandai notifikasi: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error marking notification as read:', error);
+                alert('Terjadi kesalahan jaringan saat menandai notifikasi. Detail: ' + error.message);
+            });
+        }
+
+        // Event listener untuk setiap item notifikasi (dropdown di navbar)
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.dropdown-item').forEach(item => { // Hanya pasang listener pada item notifikasi yang ada di dropdown
+                item.addEventListener('click', function(event) {
+                    if (event.target.classList.contains('mark-read-btn') || event.target.classList.contains('mark-read-dropdown')) {
+                        return; 
+                    }
+
+                    const notificationId = this.dataset.id;
+                    const bookingId = (this.dataset.bookingId && this.dataset.bookingId !== 'None') ? this.dataset.bookingId : null; 
+
+                    if (!bookingId) {
+                        markNotificationAsRead(notificationId);
+                        return;
+                    }
+
+                    currentNotificationId = notificationId;
+
+                    fetch(`/get_booking_mechanic_details/${bookingId}`)
+                        .then(response => {
+                            const contentType = response.headers.get("content-type");
+                            if (contentType && contentType.indexOf("application/json") !== -1) {
+                                return response.json();
+                            } else {
+                                return response.text().then(text => {
+                                    console.error("Server responded with non-JSON:", text);
+                                    throw new Error("Server response was not JSON: " + text);
+                                });
+                            }
+                        })
+                        .then(data => {
+                            if (data.success) {
+                                if (data.mechanic) {
+                                    modalMechanicPhoto.src = "{{ url_for('static', filename='profile_pics/') }}" + data.mechanic.profile_picture;
+                                    modalMechanicName.textContent = data.mechanic.nama_lengkap;
+                                } else {
+                                    modalMechanicPhoto.src = "{{ url_for('static', filename='profile_pics/default_profile.png') }}";
+                                    modalMechanicName.textContent = "Mekanik Belum Ditugaskan";
+                                }
+                                modalInstructionMessage.textContent = data.instruction_message;
+                                modalBookingService.textContent = `Layanan: ${data.layanan}`;
+                                modalBookingStatus.textContent = `Status: ${data.booking_status}`;
+
+                                mechanicDetailModal.style.display = 'flex';
+                                document.getElementById('notification-dropdown').style.display = 'none';
+                            } else {
+                                alert('Gagal mengambil detail: ' + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching mechanic details:', error);
+                            alert('Terjadi kesalahan saat mengambil detail mekanik. Detail: ' + error.message);
+                        });
+                });
+            });
+        });
+
+        // Event listener untuk tombol "Tandai Notifikasi Dibaca" di modal
+        modalMarkReadBtn.addEventListener('click', function() {
+            if (currentNotificationId) {
+                markNotificationAsRead(currentNotificationId);
+                mechanicDetailModal.style.display = 'none';
+                currentNotificationId = null;
+            }
+        });
+
+        // Event listener untuk tombol close modal
+        closeButton.addEventListener('click', function() {
+            mechanicDetailModal.style.display = 'none';
+        });
+
+        // Close modal if user clicks outside of it
+        window.addEventListener('click', function(event) {
+            if (event.target == mechanicDetailModal) {
+                mechanicDetailModal.style.display = 'none';
+            }
+        });
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Servis ServisGo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <div class="container navbar">
+            <a href="
+                {% if session.get('user_id') %}
+                    {% if session.get('role') == 'mechanic' %}/mechanic_dashboard
+                    {% elif session.get('role') == 'admin' %}/admin_dashboard
+                    {% elif session.get('role') == 'master' %}/master_dashboard
+                    {% else %}/dashboard
+                    {% endif %}
+                {% else %}/
+                {% endif %}
+            " class="logo">
+                <img src="{{ url_for('static', filename='images/logo_servisgo.png') }}" alt="ServisGo Logo" class="logo-img"> <span>SERVISGO</span>
+            </a>
+            <nav>
+                <ul class="nav-links">
+                    {# Link Beranda hanya jika belum login ATAU perannya adalah 'user' #}
+                    {% if not session.get('user_id') or session.get('role') == 'user' %}
+                        <li><a href="/">Beranda</a></li>
+                    {% endif %}
+                    
+                    {# Dropdown Utama "Layanan & Info" untuk SEMUA yang Sudah Login #}
+                    {% if session.get('user_id') %}
+                        <li class="dropdown">
+                            <a href="#" class="dropbtn" onclick="toggleDropdown(event, 'main-menu-dropdown')">Layanan & Info <span class="arrow">▼</span></a>
+                            <div class="dropdown-content" id="main-menu-dropdown">
+                                <a href="/layanan">Layanan</a>
+                                <a href="#">Tentang Kami</a>
+                                {% if session.get('role') == 'user' %}
+                                    <a href="/booking">Booking Servis</a>
+                                {% elif session.get('role') == 'admin' %}
+                                    <a href="/register_mechanic">Daftar Mekanik</a>
+                                {% elif session.get('role') == 'master' %}
+                                    <a href="/manage_services">Manajemen Layanan</a>
+                                    <a href="/register_admin">Daftar Admin</a>
+                                    <a href="/register_mechanic">Daftar Mekanik</a>
+                                {% endif %}
+                            </div>
+                        </li>
+                    {% else %}
+                        <li><a href="/layanan">Layanan</a></li>
+                        <li><a href="#">Tentang Kami</a></li>
+                    {% endif %}
+
+                    {# Link Dashboard Spesifik Peran #}
+                    {% if session.get('username') %}
+                        {% if session.get('role') == 'master' %}
+                            <li><a href="/master_dashboard">Dashboard Master</a></li>
+                        {% elif session.get('role') == 'admin' %}
+                            <li><a href="/admin_dashboard">Dashboard Admin</a></li>
+                        {% elif session.get('role') == 'mechanic' %}
+                            <li><a href="/mechanic_dashboard">Dashboard Mekanik</a></li>
+                            <li><a href="/mechanic_history" class="nav-btn">Riwayat Servis</a></li>
+                        {% else %}
+                            <li><a href="/dashboard">Dashboard Saya</a></li>
+                        {% endif %}
+
+                        {# Lonceng Notifikasi #}
+                        <li id="notification-bell">
+                            <a href="#" onclick="toggleNotifications()">
+                                🔔
+                                {% set unread_count = notifications | selectattr('is_read', '==', 0) | list | length %}
+                                {% if unread_count > 0 %}
+                                    <span class="notification-count">{{ unread_count }}</span>
+                                {% endif %}
+                            </a>
+                            <div id="notification-dropdown" class="notification-dropdown">
+                                <h3>Notifikasi Anda</h3>
+                                {% if notifications %}
+                                    {% for notif in notifications %}
+                                        <div class="dropdown-item {% if notif.is_read == 0 %}unread-dropdown{% endif %}">
+                                            <span class="dropdown-message">{{ notif.message }}</span>
+                                            <span class="dropdown-timestamp">{{ notif.created_at }}</span>
+                                            {% if notif.is_read == 0 %}
+                                                <button class="mark-read-dropdown" data-id="{{ notif.id }}">Tandai Dibaca</button>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="no-notifications-dropdown">Tidak ada notifikasi.</p>
+                                {% endif %}
+                            </div>
+                        </li>
+                        <li><a href="/logout">Logout ({{ session.username }})</a></li>
+                    {% else %}
+                        <li><a href="/login">Masuk/Daftar</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="form-wrapper">
+        <div class="booking-form-container">
+            <h1>Formulir Booking Servis</h1>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form id="bookingForm">
+                <div class="form-group">
+                    <label for="nama">Nama Lengkap:</label>
+                    <input type="text" id="nama" name="nama" 
+                           value="{{ user_data.nama_lengkap if user_data else '' }}" 
+                           {% if user_data %}readonly{% endif %} required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" 
+                           value="{{ user_data.email if user_data else '' }}" 
+                           {% if user_data %}readonly{% endif %} required>
+                </div>
+                <div class="form-group">
+                    <label for="telepon">Nomor Telepon:</label>
+                    <input type="tel" id="telepon" name="telepon" 
+                           value="{{ user_data.telepon if user_data else '' }}" 
+                           {% if user_data %}readonly{% endif %} required>
+                </div>
+                <div class="form-group">
+                    <label for="layanan">Pilih Layanan:</label>
+                    <select id="layanan" name="layanan" required>
+                        <option value="">-- Pilih Layanan --</option>
+                        {% for service in services %}
+                            <option value="{{ service.name }}">{{ service.name }}</option>
+                        {% endfor %}
+                        <option value="Lain-lain">Lain-lain (tidak ada di daftar)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Pilihan Lokasi Servis:</label>
+                    <div class="radio-group">
+                        <input type="radio" id="homeService" name="lokasiServis" value="Datang ke Rumah" required>
+                        <label for="homeService">Datang ke Rumah (Home Service)</label>
+                        <input type="radio" id="keBengkel" name="lokasiServis" value="Datang ke Bengkel">
+                        <label for="keBengkel">Datang ke Bengkel</label>
+                    </div>
+                </div>
+                <div class="form-group" id="alamatGroup" style="display: none;">
+                    <label for="alamat">Alamat Lengkap (untuk Home Service):</label>
+                    <textarea id="alamat" name="alamat"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="tanggal">Tanggal Servis:</label>
+                    <input type="date" id="tanggal" name="tanggal" required>
+                </div>
+                <div class="form-group">
+                    <label for="jam">Jam Servis (opsional):</label>
+                    <input type="time" id="jam" name="jam">
+                </div>
+                <div class="form-group">
+                    <label for="keterangan">Keterangan Tambahan (misal: jenis motor/mobil, keluhan):</label>
+                    <textarea id="keterangan" name="keterangan"></textarea>
+                </div>
+                <button type="submit">Kirim Permintaan Booking</button>
+            </form>
+            <div id="konfirmasiPesan" class="flash-message success" style="display: none;">
+                Terima kasih! Permintaan booking Anda telah diterima. Kami akan segera menghubungi Anda.
+            </div>
+            <div id="errorPesan" class="flash-message danger" style="display: none;">
+                Terjadi kesalahan saat mengirim booking. Silakan coba lagi.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const bookingForm = document.getElementById('bookingForm');
+        const homeServiceRadio = document.getElementById('homeService');
+        const alamatGroup = document.getElementById('alamatGroup');
+        const konfirmasiPesan = document.getElementById('konfirmasiPesan');
+        const errorPesan = document.getElementById('errorPesan');
+
+        // Tampilkan/sembunyikan field alamat berdasarkan pilihan radio
+        homeServiceRadio.addEventListener('change', function() {
+            if (this.checked) {
+                alamatGroup.style.display = 'block';
+                document.getElementById('alamat').setAttribute('required', 'required');
+            } else {
+                alamatGroup.style.display = 'none';
+                document.getElementById('alamat').removeAttribute('required');
+            }
+        });
+
+        // Tangani submit formulir
+        bookingForm.addEventListener('submit', function(event) {
+            event.preventDefault(); // Mencegah form reload halaman
+
+            // Sembunyikan pesan sebelumnya
+            konfirmasiPesan.style.display = 'none';
+            errorPesan.style.display = 'none';
+
+            // Ambil data dari form
+            const formData = {
+                nama: document.getElementById('nama').value,
+                email: document.getElementById('email').value,
+                telepon: document.getElementById('telepon').value,
+                layanan: document.getElementById('layanan').value,
+                lokasi_servis: document.querySelector('input[name="lokasiServis"]:checked') ? document.querySelector('input[name="lokasiServis"]:checked').value : '', // Pastikan ada yang terpilih
+                alamat: document.getElementById('alamat').value,
+                tanggal: document.getElementById('tanggal').value,
+                jam: document.getElementById('jam').value,
+                keterangan: document.getElementById('keterangan').value
+            };
+
+            // Validasi di sisi klien (opsional, tapi bagus untuk UX)
+            if (formData.layanan === '') {
+                errorPesan.textContent = 'Harap pilih layanan.';
+                errorPesan.style.display = 'block';
+                return;
+            }
+            if (formData.lokasi_servis === '') {
+                errorPesan.textContent = 'Harap pilih lokasi servis.';
+                errorPesan.style.display = 'block';
+                return;
+            }
+            if (formData.lokasi_servis === 'Datang ke Rumah' && formData.alamat.trim() === '') {
+                errorPesan.textContent = 'Alamat lengkap wajib diisi untuk Home Service.';
+                errorPesan.style.display = 'block';
+                return;
+            }
+
+
+            // Kirim data ke backend Flask menggunakan Fetch API
+            fetch('/submit-booking', { // URL ini harus sesuai dengan route di app.py
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json' // Mengirim data sebagai JSON
+                },
+                body: JSON.stringify(formData) // Konversi objek JS ke string JSON
+            })
+            .then(response => {
+                // Periksa apakah respons adalah JSON. Jika tidak, coba baca sebagai teks.
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    return response.json();
+                } else {
+                    return response.text().then(text => {
+                        console.error("Server responded with non-JSON:", text);
+                        throw new Error("Server response was not JSON: " + text);
+                    });
+                }
+            })
+            .then(data => {
+                if (data.success) {
+                    bookingForm.style.display = 'none'; // Sembunyikan form
+                    konfirmasiPesan.textContent = data.message || 'Terima kasih! Permintaan booking Anda telah diterima. Kami akan segera menghubungi Anda.';
+                    konfirmasiPesan.style.display = 'block'; // Tampilkan pesan konfirmasi
+                    
+                    // Reset field yang tidak readonly
+                    document.getElementById('layanan').value = '';
+                    document.getElementById('homeService').checked = false;
+                    document.getElementById('keBengkel').checked = false;
+                    alamatGroup.style.display = 'none';
+                    document.getElementById('alamat').value = '';
+                    document.getElementById('tanggal').value = '';
+                    document.getElementById('jam').value = '';
+                    document.getElementById('keterangan').value = '';
+
+                    konfirmasiPesan.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    errorPesan.textContent = data.message || 'Terjadi kesalahan saat menyimpan booking.';
+                    errorPesan.style.display = 'block'; // Tampilkan pesan error
+                    errorPesan.scrollIntoView({ behavior: 'smooth' });
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                errorPesan.textContent = 'Terjadi kesalahan jaringan atau server. Silakan coba lagi. Detail: ' + error.message;
+                errorPesan.style.display = 'block'; // Tampilkan pesan error
+                errorPesan.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        // =========================================================
+        // JAVASCRIPT UMUM UNTUK NAVIGASI (DIPERLUKAN DI SEMUA HALAMAN)
+        // =========================================================
+
+        // JavaScript for notification bell
+        function toggleNotifications() {
+            const dropdown = document.getElementById('notification-dropdown');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // JavaScript for dropdown (Manajemen menu for Master & User general menu)
+        function toggleDropdown(event, dropdownId) {
+            event.preventDefault(); // Mencegah link navigasi default
+            const currentDropdown = document.getElementById(dropdownId);
+
+            // Tutup semua dropdown lain
+            document.querySelectorAll('.dropdown-content').forEach(dropdown => {
+                if (dropdown.id !== dropdownId) { // Jangan tutup dropdown yang sedang dibuka
+                    dropdown.style.display = 'none';
+                }
+            });
+
+            // Toggle (buka/tutup) dropdown yang diklik
+            currentDropdown.style.display = currentDropdown.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // Close all dropdowns if the user clicks outside of them
+        window.onclick = function(event) {
+            // Close notification dropdown
+            const notificationDropdown = document.getElementById('notification-dropdown');
+            const notificationBell = document.getElementById('notification-bell');
+            if (notificationDropdown && notificationDropdown.style.display === 'block' && 
+                notificationBell && !notificationBell.contains(event.target)) {
+                notificationDropdown.style.display = 'none';
+            }
+
+            // Close management dropdowns
+            const managementDropdowns = document.getElementsByClassName('dropdown-content');
+            const dropbtns = document.querySelectorAll('.dropbtn');
+
+            let clickedInsideAnyDropdown = false;
+            for (let i = 0; i < dropbtns.length; i++) {
+                if (dropbtns[i].contains(event.target)) {
+                    clickedInsideAnyDropdown = true;
+                    break;
+                }
+            }
+            if (!clickedInsideAnyDropdown) {
+                for (let i = 0; i < managementDropdowns.length; i++) {
+                    if (managementDropdowns[i].contains(event.target)) {
+                        clickedInsideAnyDropdown = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!clickedInsideAnyDropdown) {
+                for (let i = 0; i < managementDropdowns.length; i++) {
+                    managementDropdowns[i].style.display = 'none';
+                }
+            }
+        }
+
+        // JavaScript for marking notifications as read (main content & dropdown)
+        // Ini mungkin tidak relevan langsung di halaman booking.html, tapi perlu ada untuk navbar
+        document.querySelectorAll('.mark-read-btn, .mark-read-dropdown').forEach(button => {
+            button.addEventListener('click', function() {
+                const notificationId = this.dataset.id;
+                
+                fetch(`/mark_notification_read/${notificationId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const mainNotificationItem = document.querySelector(`.notification-item[data-id="${notificationId}"]`); 
+                        if (mainNotificationItem) {
+                            mainNotificationItem.classList.remove('unread');
+                            const mainButton = mainNotificationItem.querySelector('.mark-read-btn');
+                            if (mainButton) mainButton.remove();
+                        }
+                        
+                        const dropdownItem = document.querySelector(`#notification-dropdown .dropdown-item[data-id="${notificationId}"]`);
+                        if (dropdownItem) {
+                            dropdownItem.classList.remove('unread-dropdown');
+                            const dropdownButton = dropdownItem.querySelector('.mark-read-dropdown');
+                            if (dropdownButton) dropdownButton.remove();
+                        }
+                        
+                        const notificationCountSpan = document.querySelector('.notification-count');
+                        if (notificationCountSpan) {
+                            let currentCount = parseInt(notificationCountSpan.textContent);
+                            currentCount--;
+                            if (currentCount > 0) {
+                                notificationCountSpan.textContent = currentCount;
+                            } else {
+                                notificationCountSpan.remove();
+                            }
+                        }
+                    } else {
+                        alert('Gagal menandai notifikasi: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan jaringan.');
+                });
+            });
+        });
+
+    </script>
+</body>
+</html>

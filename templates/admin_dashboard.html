@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin ServisGo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <div class="container navbar">
+            <a href="
+                {% if session.get('user_id') %}
+                    {% if session.get('role') == 'mechanic' %}/mechanic_dashboard
+                    {% elif session.get('role') == 'admin' %}/admin_dashboard
+                    {% elif session.get('role') == 'master' %}/master_dashboard
+                    {% else %}/dashboard
+                    {% endif %}
+                {% else %}/
+                {% endif %}
+            " class="logo">
+                <img src="{{ url_for('static', filename='images/logo_servisgo.png') }}" alt="ServisGo Logo" class="logo-img"> <span>SERVISGO</span>
+            </a>
+            <nav>
+                <ul class="nav-links">
+                    {# Link Beranda hanya jika belum login ATAU perannya adalah 'user' #}
+                    {% if not session.get('user_id') or session.get('role') == 'user' %}
+                        <li><a href="/">Beranda</a></li>
+                    {% endif %}
+                    
+                    {# Dropdown Utama "Layanan & Info" untuk SEMUA yang Sudah Login #}
+                    {% if session.get('user_id') %}
+                        <li class="dropdown">
+                            <a href="#" class="dropbtn" onclick="toggleDropdown(event, 'main-menu-dropdown')">Layanan & Info <span class="arrow">▼</span></a>
+                            <div class="dropdown-content" id="main-menu-dropdown">
+                                <a href="/layanan">Layanan</a>
+                                <a href="#">Tentang Kami</a>
+                                {% if session.get('role') == 'user' %}
+                                    <a href="/booking">Booking Servis</a>
+                                {% elif session.get('role') == 'admin' %}
+                                    <a href="/register_mechanic">Daftar Mekanik</a>
+                                {% elif session.get('role') == 'master' %}
+                                    <a href="/manage_services">Manajemen Layanan</a>
+                                    <a href="/register_admin">Daftar Admin</a>
+                                    <a href="/register_mechanic">Daftar Mekanik</a>
+                                {% endif %}
+                            </div>
+                        </li>
+                    {% else %}
+                        <li><a href="/layanan">Layanan</a></li>
+                        <li><a href="#">Tentang Kami</a></li>
+                    {% endif %}
+
+                    {# Link Dashboard Spesifik Peran #}
+                    {% if session.get('username') %}
+                        {% if session.get('role') == 'master' %}
+                            <li><a href="/master_dashboard">Dashboard Master</a></li>
+                        {% elif session.get('role') == 'admin' %}
+                            <li><a href="/admin_dashboard">Dashboard Admin</a></li>
+                        {% elif session.get('role') == 'mechanic' %}
+                            <li><a href="/mechanic_dashboard">Dashboard Mekanik</a></li>
+                            <li><a href="/mechanic_history" class="nav-btn">Riwayat Servis</a></li>
+                        {% else %}
+                            <li><a href="/dashboard">Dashboard Saya</a></li>
+                        {% endif %}
+
+                        {# Lonceng Notifikasi #}
+                        <li id="notification-bell">
+                            <a href="#" onclick="toggleNotifications()">
+                                🔔
+                                {% set unread_count = notifications | selectattr('is_read', '==', 0) | list | length %}
+                                {% if unread_count > 0 %}
+                                    <span class="notification-count">{{ unread_count }}</span>
+                                {% endif %}
+                            </a>
+                            <div id="notification-dropdown" class="notification-dropdown">
+                                <h3>Notifikasi Anda</h3>
+                                {% if notifications %}
+                                    {% for notif in notifications %}
+                                        <div class="dropdown-item {% if notif.is_read == 0 %}unread-dropdown{% endif %}" data-id="{{ notif.id }}" data-booking-id="{{ notif.booking_id }}">
+                                            <span class="dropdown-message">{{ notif.message }}</span>
+                                            <span class="dropdown-timestamp">{{ notif.created_at }}</span>
+                                            {% if notif.is_read == 0 %}
+                                                <button class="mark-read-dropdown" data-id="{{ notif.id }}">Tandai Dibaca</button>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="no-notifications-dropdown">Tidak ada notifikasi.</p>
+                                {% endif %}
+                            </div>
+                        </li>
+                        <li><a href="/logout">Logout ({{ session.username }})</a></li>
+                    {% else %}
+                        <li><a href="/login">Masuk/Daftar</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <h1></h1>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {# Pembungkus Utama untuk Profil dan Sampul (SALIN DARI DASHBOARD PENGGUNA) #}
+            <div class="user-profile-wrapper" style="background-image: url('{{ url_for('static', filename='cover_pics/' + cover_picture) }}');">
+                <div class="cover-overlay"></div>
+                
+                <div class="profile-section">
+                    <div class="profile-pic-container">
+                        <img src="{{ url_for('static', filename='profile_pics/' + profile_picture) }}" alt="Foto Profil">
+                    </div>
+                    <div class="profile-info-wrapper">
+                        <div class="profile-info">
+                            <p class="profile-username">Halo, {{ session.username }}!</p>
+                            <p class="profile-role">Peran: {{ session.role | capitalize }}</p>
+                        </div>
+                        <form action="{{ url_for('upload_profile_pic') }}" method="POST" enctype="multipart/form-data" class="profile-upload-form">
+                            <label for="profile_file" class="profile-upload-label">Ubah Foto Profil</label>
+                            <input type="file" name="file" id="profile_file" accept="image/png, image/jpeg, image/gif">
+                            <button type="submit" class="profile-upload-button">Unggah Foto</button>
+                        </form>
+                    </div>
+                </div>
+
+                <form action="{{ url_for('upload_cover_pic') }}" method="POST" enctype="multipart/form-data" class="cover-upload-form">
+                    <label for="cover_file" class="cover-upload-label">Ubah Sampul</label>
+                    <input type="file" name="file" id="cover_file" accept="image/png, image/jpeg, image/gif">
+                    <button type="submit" class="cover-upload-button">Unggah</button>
+                </form>
+            </div>
+
+            <div class="filter-form-container">
+                <form id="filterForm" action="{{ url_for('admin_dashboard') }}" method="GET">
+                    <div class="filter-form-group">
+                        <label for="filter_by">Filter Berdasarkan:</label>
+                        <select id="filter_by" name="filter_by">
+                            <option value="">Semua Waktu</option>
+                            <option value="day" {% if current_filter_by == 'day' %}selected{% endif %}>Per Hari</option>
+                            <option value="week" {% if current_filter_by == 'week' %}selected{% endif %}>Per Minggu</option>
+                            <option value="month" {% if current_filter_by == 'month' %}selected{% endif %}>Per Bulan</option>
+                            <option value="year" {% if current_filter_by == 'year' %}selected{% endif %}>Per Tahun</option>
+                            <option value="hour" {% if current_filter_by == 'hour' %}selected{% endif %}>Per Jam</option>
+                        </select>
+                    </div>
+                    <div class="filter-form-group">
+                        <label for="filter_value_input">Nilai Filter:</label>
+                        <input type="text" id="filter_value_input" name="filter_value" placeholder="Pilih tanggal/bulan/tahun/jam" value="{{ current_filter_value | default('', true) }}">
+                    </div>
+                    <div class="filter-form-group">
+                        <input type="submit" value="Terapkan Filter">
+                    </div>
+                </form>
+            </div>
+
+            <h2>Semua Booking Masuk</h2>
+            {% if all_bookings %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID Booking</th>
+                            <th>Pengguna</th>
+                            <th>Layanan</th>
+                            <th>Tanggal</th>
+                            <th>Jam</th>
+                            <th>Lokasi</th>
+                            <th>Status</th>
+                            <th>Mekanik</th>
+                            <th>Waktu Booking</th>
+                            <th>Selesai Pada</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in all_bookings %}
+                            <tr>
+                                <td>{{ booking.id }}</td>
+                                <td>{{ booking.client_username }} ({{ booking.client_email }})</td>
+                                <td>{{ booking.layanan }}</td>
+                                <td>{{ booking.tanggal }}</td>
+                                <td>{{ booking.jam | default('N/A', true) }}</td>
+                                <td>
+                                    {{ booking.lokasi_servis }}
+                                    {% if booking.lokasi_servis == 'Datang ke Rumah' and booking.alamat %}
+                                        <br>({{ booking.alamat }})
+                                    {% endif %}
+                                </td>
+                                <td><span class="status-badge status-{{ booking.status | replace(' ', '') }}">{{ booking.status }}</span></td>
+                                <td>{{ booking.mechanic_name | default('Belum Ditugaskan', true) }}</td>
+                                <td>{{ booking.timestamp }}</td>
+                                <td>{{ booking.completed_at | default('Belum Selesai', true) }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Belum ada booking yang masuk.</p>
+            {% endif %}
+
+        </div>
+    </main>
+
+    <script>
+        // JavaScript for notification bell
+        function toggleNotifications() {
+            const dropdown = document.getElementById('notification-dropdown');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // JavaScript for dropdown (Manajemen menu for Master & User general menu)
+        function toggleDropdown(event, dropdownId) {
+            event.preventDefault();
+            const currentDropdown = document.getElementById(dropdownId);
+
+            document.querySelectorAll('.dropdown-content').forEach(dropdown => {
+                if (dropdown.id !== dropdownId) {
+                    dropdown.style.display = 'none';
+                }
+            });
+
+            currentDropdown.style.display = currentDropdown.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // Close all dropdowns if the user clicks outside of them
+        window.onclick = function(event) {
+            const notificationDropdown = document.getElementById('notification-dropdown');
+            const notificationBell = document.getElementById('notification-bell');
+            if (notificationDropdown && notificationDropdown.style.display === 'block' && 
+                notificationBell && !notificationBell.contains(event.target)) {
+                notificationDropdown.style.display = 'none';
+            }
+
+            const managementDropdowns = document.getElementsByClassName('dropdown-content');
+            const dropbtns = document.querySelectorAll('.dropbtn');
+
+            let clickedInsideAnyDropdown = false;
+            for (let i = 0; i < dropbtns.length; i++) {
+                if (dropbtns[i].contains(event.target)) {
+                    clickedInsideAnyDropdown = true;
+                    break;
+                }
+            }
+            if (!clickedInsideAnyDropdown) {
+                for (let i = 0; i < managementDropdowns.length; i++) {
+                    if (managementDropdowns[i].contains(event.target)) {
+                        clickedInsideAnyDropdown = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!clickedInsideAnyDropdown) {
+                for (let i = 0; i < managementDropdowns.length; i++) {
+                    managementDropdowns[i].style.display = 'none';
+                }
+            }
+        }
+
+        // JavaScript for filter form dynamic input type (Admin has this too)
+        document.addEventListener('DOMContentLoaded', function() {
+            const filterBySelect = document.getElementById('filter_by');
+            const filterValueInput = document.getElementById('filter_value_input');
+
+            function updateFilterInputType() {
+                const selectedFilter = filterBySelect.value;
+                filterValueInput.value = ''; // Clear value on type change
+                filterValueInput.placeholder = 'Pilih tanggal/bulan/tahun/jam'; // Default placeholder
+
+                if (selectedFilter === 'day' || selectedFilter === 'week') {
+                    filterValueInput.type = 'date';
+                    filterValueInput.placeholder = 'YYYY-MM-DD';
+                } else if (selectedFilter === 'month') {
+                    filterValueInput.type = 'month';
+                    filterValueInput.placeholder = 'YYYY-MM';
+                } else if (selectedFilter === 'year') {
+                    filterValueInput.type = 'number';
+                    filterValueInput.placeholder = 'YYYY';
+                    filterValueInput.setAttribute('min', '2000');
+                    filterValueInput.setAttribute('max', '2099');
+                } else if (selectedFilter === 'hour') {
+                    filterValueInput.type = 'datetime-local';
+                    filterValueInput.placeholder = 'YYYY-MM-DD HH';
+                } else {
+                    filterValueInput.type = 'text'; // Fallback for 'Semua Waktu'
+                    filterValueInput.placeholder = 'Pilih tanggal/bulan/tahun/jam';
+                }
+            }
+
+            updateFilterInputType();
+            filterBySelect.addEventListener('change', updateFilterInputType);
+        });
+
+        // JavaScript for marking notifications as read (only from dropdown for admin_dashboard)
+        document.querySelectorAll('.dropdown-item').forEach(item => {
+            item.addEventListener('click', function(event) {
+                if (event.target.classList.contains('mark-read-btn') || event.target.classList.contains('mark-read-dropdown')) {
+                    return; 
+                }
+
+                const notificationId = this.dataset.id;
+                const bookingId = (this.dataset.bookingId && this.dataset.bookingId !== 'None') ? this.dataset.bookingId : null; 
+
+                if (!bookingId) {
+                    markNotificationAsRead(notificationId);
+                    return;
+                }
+
+                // For admin, clicking on booking-related notifications (new booking)
+                // just marks them as read. If admin needs to see details, they go to main table.
+                markNotificationAsRead(notificationId);
+            });
+        });
+
+        // Functions for notifications in general (used by admin_dashboard.html too)
+        function markNotificationAsRead(notificationIdToMark) {
+            fetch(`/mark_notification_read/${notificationIdToMark}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({})
+            })
+            .then(response => {
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    return response.json();
+                } else {
+                    return response.text().then(text => {
+                        console.error("Server responded with non-JSON for mark as read:", text);
+                        throw new Error("Server response for mark as read was not JSON: " + text);
+                    });
+                }
+            })
+            .then(data => {
+                if (data.success) {
+                    const dropdownItem = document.querySelector(`#notification-dropdown .dropdown-item[data-id="${notificationIdToMark}"]`);
+                    if (dropdownItem) {
+                        dropdownItem.remove();
+                    }
+                    
+                    const notificationCountSpan = document.querySelector('.notification-count');
+                    if (notificationCountSpan) {
+                        let currentCount = parseInt(notificationCountSpan.textContent);
+                        currentCount--;
+                        if (currentCount > 0) {
+                            notificationCountSpan.textContent = currentCount;
+                        } else {
+                            notificationCountSpan.remove();
+                        }
+                    }
+                } else {
+                    alert('Gagal menandai notifikasi: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error marking notification as read:', error);
+                alert('Terjadi kesalahan jaringan saat menandai notifikasi. Detail: ' + error.message);
+            });
+        }
+    </script>
+</body>
+</html>

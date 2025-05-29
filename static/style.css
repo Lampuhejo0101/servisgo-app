@@ -1,0 +1,1609 @@
+/* General & Body */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    color: #333;
+    line-height: 1.6;
+    background-color: #f8f8f8; /* Default background for all pages */
+    display: flex; /* For full height pages with header/footer */
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Header / Navbar */
+header {
+    background-color: #ffffff;
+    padding: 15px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap; /* Izinkan wrapping di mobile */
+}
+
+.logo {
+    font-size: 28px;
+    font-weight: 700;
+    color: #007bff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    padding: 5px 0; /* Tambah padding agar area klik di mobile lebih mudah */
+}
+
+.logo-img {
+    height: 30px;
+    width: auto;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+.logo span {
+    font-size: 28px;
+    font-weight: 700;
+    color: #007bff;
+}
+
+
+.nav-links {
+    list-style: none; /* Remove bullet point */
+    margin: 0;
+    padding: 0;
+    display: flex; /* Make item-item horizontal */
+    align-items: center; /* Align items vertically in the center */
+}
+
+.nav-links li {
+    margin-left: 30px;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #555;
+    font-weight: 600;
+    transition: color 0.3s ease;
+    padding: 15px 0; /* Tambah padding untuk area klik yang lebih besar */
+}
+
+.nav-links a:hover {
+    color: #007bff;
+}
+
+/* Styling for buttons in navigation */
+.nav-btn {
+    background-color: #28a745;
+    color: white !important; /* Override other link colors */
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+    margin-left: 20px; /* Space from previous nav item */
+}
+
+.nav-btn:hover {
+    background-color: #218838 !important; /* Darker green on hover */
+    text-decoration: none;
+}
+
+
+/* Hero Section (Specific to index.html) */
+.hero-section {
+    background-color: #e6f2ff;
+    padding: 80px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 600px;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 1200px;
+    padding: 0 20px;
+    flex-wrap: wrap;
+}
+
+.hero-text {
+    flex: 1;
+    min-width: 350px;
+    padding-right: 40px;
+}
+
+.hero-text h2 {
+    font-size: 50px;
+    font-weight: 700;
+    color: #222;
+    line-height: 1.2;
+    margin-bottom: 20px;
+}
+
+.hero-text p {
+    font-size: 18px;
+    color: #555;
+    margin-bottom: 30px;
+}
+
+.btn-primary {
+    display: inline-block;
+    background-color: #007bff;
+    color: white;
+    padding: 15px 30px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 20px;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.hero-illustration {
+    flex: 1;
+    min-width: 450px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.hero-illustration img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Features Section (Specific to index.html) */
+.features-section {
+    padding: 80px 0;
+    background-color: #ffffff;
+    text-align: center;
+}
+
+.features-grid {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+}
+
+.feature-item {
+    flex-basis: calc(33.33% - 40px);
+    max-width: 300px;
+    background-color: #f9f9f9;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.feature-item .icon {
+    font-size: 40px;
+    color: #007bff;
+    margin-bottom: 20px;
+}
+
+.feature-item h3 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.feature-item p {
+    font-size: 16px;
+    color: #666;
+}
+
+/* Form Styles (Used by booking.html, register.html, login.html, register_admin.html) */
+.form-wrapper {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 0;
+}
+
+.auth-form-container,
+.booking-form-container,
+.admin-register-form-container {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px;
+}
+
+/* Specific adjustments for different forms */
+.auth-form-container {
+    max-width: 500px;
+    padding: 40px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+.login-form-container {
+    max-width: 400px;
+}
+.admin-register-form-container {
+    max-width: 500px;
+    padding: 30px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+}
+
+
+h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 25px;
+    font-size: 36px;
+}
+.auth-form-container h1,
+.admin-register-form-container h1 {
+    margin-bottom: 30px;
+}
+
+
+.form-group {
+    margin-bottom: 15px;
+}
+.auth-form-container .form-group,
+.admin-register-form-container .form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    color: #555;
+    font-weight: bold;
+}
+.auth-form-container label,
+.admin-register-form-container label {
+    margin-bottom: 8px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="date"],
+input[type="time"],
+input[type="password"],
+select,
+textarea {
+    width: calc(100% - 20px);
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+.auth-form-container input[type="text"],
+.auth-form-container input[type="email"],
+.auth-form-container input[type="tel"],
+.auth-form-container input[type="password"],
+.admin-register-form-container input[type="text"],
+.admin-register-form-container input[type="email"],
+.admin-register-form-container input[type="tel"],
+.admin-register-form-container input[type="password"] {
+    width: calc(100% - 22px);
+    padding: 11px;
+    border-radius: 6px;
+}
+
+
+input[type="radio"] {
+    margin-right: 5px;
+}
+.radio-group label {
+    display: inline-block;
+    margin-right: 15px;
+    font-weight: normal;
+}
+.auth-form-container .radio-group label {
+    margin-right: 20px;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Buttons in forms */
+.booking-form-container button,
+.auth-form-container button[type="submit"],
+.admin-register-form-container button[type="submit"] {
+    background-color: #007bff;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 18px;
+    width: 100%;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+}
+.booking-form-container button:hover,
+.auth-form-container button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+.admin-register-form-container button[type="submit"] {
+    background-color: #28a745;
+}
+.admin-register-form-container button[type="submit"]:hover {
+    background-color: #218838;
+}
+
+.form-footer {
+    text-align: center;
+    margin-top: 25px;
+    font-size: 15px;
+}
+
+.form-footer a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.form-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Flash Messages */
+.flash-message {
+    padding: 12px;
+    margin-bottom: 20px;
+    border-radius: 6px;
+    text-align: center;
+    font-weight: 600;
+    color: white;
+    max-width: 800px;
+    margin: 20px auto;
+}
+
+.flash-message.success { background-color: #28a745; }
+.flash-message.danger { background-color: #dc3545; }
+.flash-message.info { background-color: #17a2b8; }
+
+
+/* Main content (for dashboard, services) */
+main {
+    flex-grow: 1;
+    padding: 40px 0;
+}
+
+main h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+    font-size: 36px;
+}
+main h2 {
+    color: #444;
+    margin-top: 40px;
+    margin-bottom: 20px;
+    font-size: 28px;
+    text-align: center;
+}
+
+/* Services Page Specific */
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.service-item {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    text-align: left;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.service-item:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
+}
+
+.service-item h3 {
+    font-size: 28px;
+    color: #007bff;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #e6f2ff;
+    padding-bottom: 10px;
+}
+
+.service-item p {
+    font-size: 17px;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.service-item .price {
+    font-size: 20px;
+    font-weight: 700;
+    color: #28a745;
+    margin-top: 20px;
+    display: block;
+}
+
+/* Table Styles (Used in all dashboards) */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #007bff;
+    color: white;
+    font-weight: 600;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.status-Pending { background-color: #ffc107; color: #333;}
+.status-Confirmed { background-color: #28a745; }
+.status-InProgress { background-color: #17a2b8; }
+.status-Completed { background-color: #6c757d; }
+.status-Cancelled { background-color: #dc3545; }
+
+/* Form update status in tables */
+.status-form {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+.status-form select {
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+.status-form button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+}
+.status-form button:hover {
+    background-color: #0056b3;
+}
+
+/* No bookings/users message */
+.no-bookings {
+    text-align: center;
+    color: #777;
+    padding: 30px;
+    font-size: 18px;
+}
+.no-bookings a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 600;
+}
+.no-bookings a:hover {
+    text-decoration: underline;
+}
+
+/* Notification Styles (for dashboard.html and bell icon) */
+.notification-container { /* This element is now likely removed from HTML */
+    margin-top: 30px;
+    margin-bottom: 30px;
+    background-color: #e3f2fd;
+    border-left: 5px solid #2196f3;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+.notification-container h2 {
+    margin-top: 0;
+    color: #1976d2;
+    font-size: 24px;
+    text-align: left;
+    margin-bottom: 20px;
+}
+.notification-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    background-color: #ffffff;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    position: relative;
+}
+.notification-item:last-child {
+    margin-bottom: 0;
+}
+.notification-item.unread {
+    background-color: #fffde7;
+    border-left: 4px solid #ffc107;
+}
+.notification-content {
+    flex-grow: 1;
+    padding-right: 15px;
+}
+.notification-message {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 5px;
+    line-height: 1.4;
+}
+.notification-timestamp {
+    font-size: 13px;
+    color: #777;
+}
+.mark-read-btn {
+    background: none;
+    border: 1px solid #007bff;
+    color: #007bff;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+.mark-read-btn:hover {
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+}
+.no-notifications {
+    color: #777;
+    text-align: center;
+    padding: 20px;
+}
+
+/* Notification Bell Icon in Navbar */
+#notification-bell {
+    position: relative;
+    margin-left: 30px;
+}
+#notification-bell a {
+    position: relative;
+    color: #555;
+    font-size: 24px;
+    text-decoration: none;
+    padding: 5px;
+    display: inline-block;
+}
+#notification-bell a:hover {
+    color: #007bff;
+}
+.notification-count {
+    position: absolute;
+    top: 0px;
+    right: -10px;
+    background-color: #dc3545;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: 50%;
+    padding: 3px 7px;
+    line-height: 1;
+    min-width: 10px;
+    text-align: center;
+}
+
+/* Notification Dropdown */
+.notification-dropdown {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 300px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1000;
+    right: 0;
+    top: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+}
+.notification-dropdown h3 {
+    margin: 0;
+    padding: 15px;
+    background-color: #007bff;
+    color: white;
+    font-size: 18px;
+    text-align: center;
+}
+.dropdown-item {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    position: relative;
+    transition: background-color 0.2s ease;
+}
+.dropdown-item:last-child {
+    border-bottom: none;
+}
+.dropdown-item:hover {
+    background-color: #f1f1f1;
+}
+.dropdown-item.unread-dropdown {
+    background-color: #fff8e1;
+    border-left: 3px solid #ffcc80;
+}
+.dropdown-message {
+    font-size: 15px;
+    color: #333;
+    margin-bottom: 3px;
+    line-height: 1.4;
+}
+.dropdown-timestamp {
+    font-size: 12px;
+    color: #888;
+}
+.mark-read-dropdown {
+    background-color: #e0e0e0;
+    color: #555;
+    border: none;
+    padding: 5px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    margin-top: 8px;
+    align-self: flex-end;
+    transition: background-color 0.2s ease;
+}
+.mark-read-dropdown:hover {
+    background-color: #d0d0d0;
+}
+.no-notifications-dropdown {
+    padding: 15px;
+    color: #777;
+    text-align: center;
+    font-size: 14px;
+}
+
+/* Dropdown Navigation (for Master role and User general menu) */
+.dropdown {
+    position: relative;
+    display: inline-block;
+    margin-left: 30px;
+}
+
+.dropbtn {
+    color: #555;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 15px 0;
+    display: block;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.dropbtn:hover {
+    color: #007bff;
+}
+
+.dropbtn .arrow {
+    margin-left: 5px;
+    font-size: 0.8em;
+    transition: transform 0.3s ease;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1001;
+    border-radius: 5px;
+    overflow: hidden;
+    top: 100%;
+    left: 0;
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    text-align: left;
+    font-weight: normal;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.dropdown-content a:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+/* Styling for dashboard actions like Register Mechanic button */
+.dashboard-actions {
+    text-align: center;
+    margin-bottom: 40px;
+    margin-top: 20px;
+}
+.dashboard-actions .btn-admin-action,
+.dashboard-actions .btn-mechanic-action {
+    display: inline-block;
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+    margin: 10px;
+}
+.dashboard-actions .btn-admin-action:hover,
+.dashboard-actions .btn-mechanic-action:hover {
+    background-color: #218838;
+}
+
+/* Jika Anda ingin warna mekanik berbeda dari admin */
+.dashboard-actions .btn-mechanic-action {
+    background-color: #007bff;
+}
+.dashboard-actions .btn-mechanic-action:hover {
+    background-color: #0056b3;
+}
+
+
+/* Filter Form Styles */
+.filter-form-container {
+    background-color: #ffffff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    margin-bottom: 30px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+    align-items: flex-end;
+}
+.filter-form-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 150px;
+}
+.filter-form-group label {
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+    font-size: 15px;
+}
+.filter-form-container select,
+.filter-form-container input[type="date"],
+.filter-form-container input[type="month"],
+.filter-form-container input[type="year"],
+.filter-form-container input[type="datetime-local"],
+.filter-form-container input[type="text"],
+.filter-form-container input[type="number"],
+.filter-form-container input[type="submit"] {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+.filter-form-container input[type="submit"] {
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    border: none;
+    font-weight: 600;
+    padding: 10px 20px;
+}
+.filter-form-container input[type="submit"]:hover {
+    background-color: #0056b3;
+}
+#filter_value_input {
+    width: 100%;
+}
+
+
+/* Specific styles for manage_services */
+.add-service-form-container {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+    max-width: 600px;
+    margin: 40px auto;
+}
+.add-service-form-container h2 {
+    margin-top: 0;
+    margin-bottom: 25px;
+    font-size: 28px;
+    color: #333;
+    text-align: center;
+}
+.add-service-form-container .form-group {
+    margin-bottom: 15px;
+}
+.add-service-form-container label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+.add-service-form-container input[type="text"],
+.add-service-form-container input[type="number"],
+.add-service-form-container textarea {
+    width: calc(100% - 20px);
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+.add-service-form-container textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+.add-service-form-container button[type="submit"] {
+    background-color: #007bff;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 18px;
+    width: 100%;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+}
+.add-service-form-container button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+.service-list-section {
+    margin-top: 60px;
+    text-align: center;
+}
+.service-list-section h2 {
+    margin-bottom: 25px;
+}
+.service-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+.service-actions .btn-edit, .service-actions .btn-delete {
+    padding: 8px 12px;
+    border-radius: 5px;
+    text-decoration: none;
+    color: white;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+.service-actions .btn-edit {
+    background-color: #17a2b8;
+}
+.service-actions .btn-edit:hover {
+    background-color: #138496;
+}
+.service-actions .btn-delete {
+    background-color: #dc3545;
+}
+.service-actions .btn-delete:hover {
+    background-color: #c82333;
+}
+
+/* Specific styles for edit_service */
+.edit-service-form-container {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+    max-width: 600px;
+    margin: 40px auto;
+}
+.edit-service-form-container h1 {
+    margin-top: 0;
+    margin-bottom: 25px;
+    font-size: 32px;
+    color: #333;
+    text-align: center;
+}
+.edit-service-form-container .form-group {
+    margin-bottom: 15px;
+}
+.edit-service-form-container label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+.edit-service-form-container input[type="text"],
+.edit-service-form-container input[type="number"],
+.edit-service-form-container textarea {
+    width: calc(100% - 20px);
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+.edit-service-form-container textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+.edit-service-form-container button[type="submit"] {
+    background-color: #28a745;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 18px;
+    width: 100%;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+}
+.edit-service-form-container button[type="submit"]:hover {
+    background-color: #218838;
+}
+.back-link {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 600;
+}
+.back-link:hover {
+    text-decoration: underline;
+}
+
+
+/* ... (existing CSS sampai sebelum Main Wrapper for Profile & Cover) ... */
+
+/* ... (existing CSS sampai sebelum Main Wrapper for Profile & Cover) ... */
+
+/* Main Wrapper for Profile & Cover (where cover will be the background) */
+.user-profile-wrapper {
+    position: relative; /* Penting untuk positioning anak-anaknya */
+    width: 100%;
+    max-width: 800px; /* Batasi lebar total profil area */
+    height: 250px; /* Tinggi keseluruhan area profil/sampul */
+    margin: 20px auto 30px auto; /* Tengahkan horizontal */
+    background-color: #ffffff; /* Warna fallback jika gambar sampul tidak ada/gagal load */
+    border-radius: 10px;
+    overflow: hidden; /* Pastikan semua konten di dalam border-radius */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    box-sizing: border-box; /* Pastikan padding/border termasuk dalam ukuran total */
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url("{{ url_for('static', filename='cover_pics/default_cover.png') }}");
+}
+
+.cover-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 100%);
+    z-index: 1; /* Pastikan di atas background tapi di bawah konten profil */
+}
+
+/* Profile Section (ini adalah kontainer untuk foto profil, info, dan form upload) */
+.profile-section {
+    position: absolute; /* Posisikan secara absolut di dalam user-profile-wrapper */
+    bottom: 0; /* Pindah ke bawah */
+    left: 0; /* Pindah ke kiri */
+    padding: 0 20px 20px 20px; /* Padding dari pojok kiri bawah (atas, kanan, bawah, kiri) */
+    width: 100%; /* Ambil lebar penuh */
+    box-sizing: border-box;
+    display: flex; /* Gunakan flex untuk menata foto profil dan info vertikal */
+    flex-direction: column; /* Tumpuk foto profil dan info secara vertikal */
+    align-items: flex-start; /* Rata kiri untuk seluruh blok profile-section */
+    background-color: transparent;
+    z-index: 2;
+}
+
+/* Kontainer foto profil */
+.profile-pic-container {
+    width: 100px; /* Ukuran foto profil */
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid #ffffff; /* Border putih menonjol */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4); /* Bayangan lebih kuat untuk efek "mengambang" */
+    background-color: white; /* Pastikan background putih */
+    flex-shrink: 0; /* Jangan biarkan foto profil mengecil */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative; /* Untuk z-index jika tumpang tindih dengan elemen lain di masa depan */
+    z-index: 3; /* Pastikan foto profil di atas segalanya */
+    transform: translateY(70px); /* Geser foto profil ke bawah sedikit agar menonjol dari sampul dan elemen di bawahnya */
+    margin-bottom: 20px; /* Jarak dari teks dan form di bawahnya */
+}
+
+.profile-pic-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Kontainer untuk Nama, Peran, dan Form Upload Foto Profil (akan berada di bawah foto profil) */
+.profile-info-wrapper { /* Nama baru untuk kontainer ini, lebih spesifik */
+    display: flex;
+    flex-direction: column; /* Tumpuk semua elemen di dalamnya secara vertikal */
+    align-items: flex-start; /* Rata kiri untuk teks dan form */
+    margin-left: 0; /* Reset margin-left yang lama */
+    flex-grow: 1; /* Biarkan mengisi ruang yang tersedia */
+    width: 100%; /* Ambil lebar penuh di dalam profile-section */
+    transform: translateY(40px); /* Geser ke bawah agar sejajar dengan foto profil */
+}
+
+/* Info profil (nama, peran) */
+.profile-info { /* Ini hanya akan berisi username dan role sekarang */
+    display: flex;
+    flex-direction: column; /* Tumpuk username dan role */
+    align-items: flex-start; /* Rata kiri teks */
+    margin-bottom: 10px; /* Jarak dari form upload */
+}
+
+.profile-username {
+    font-size: 24px;
+    font-weight: 700;
+    color: white;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+    margin-bottom: 5px;
+}
+
+.profile-role {
+    font-size: 16px;
+    color: #e0e0e0;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+    margin-left: 0;
+    margin-bottom: 0;
+}
+
+/* Upload Form for Profile Picture (di dalam profile-info-wrapper) */
+.profile-upload-form {
+    display: flex;
+    flex-direction: row; /* Tombol "Ubah" dan "Unggah" sejajar */
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    width: auto; /* Sesuaikan lebar dengan konten */
+    max-width: 280px; /* Batasi lebar form upload */
+    justify-content: flex-start; /* Rata kiri untuk tombol */
+}
+
+.profile-upload-form label.profile-upload-label {
+    background-color: rgba(255,255,255,0.2);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    white-space: nowrap;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    border: 1px solid rgba(255,255,255,0.5);
+    display: inline-block;
+    text-align: center;
+}
+
+.profile-upload-form label.profile-upload-label:hover {
+    background-color: rgba(255,255,255,0.3);
+    border-color: rgba(255,255,255,0.8);
+}
+
+.profile-upload-form input[type="file"] {
+    display: none;
+}
+
+.profile-upload-form button.profile-upload-button {
+    background-color: rgba(40,167,69,0.8);
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    white-space: nowrap;
+    transition: background-color 0.3s ease;
+    flex-shrink: 0;
+}
+.profile-upload-form button.profile-upload-button:hover {
+    background-color: rgba(40,167,69,1);
+}
+
+/* Form Upload Cover Picture (akan ada di dalam user-profile-wrapper, di pojok kanan atas) */
+.cover-upload-form {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 5;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.cover-upload-label {
+    background-color: rgba(255,255,255,0.2);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    white-space: nowrap;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    border: 1px solid rgba(255,255,255,0.5);
+    display: inline-block;
+    text-align: center;
+}
+
+.cover-upload-label:hover {
+    background-color: rgba(255,255,255,0.3);
+    border-color: rgba(255,255,255,0.8);
+}
+
+.cover-upload-form input[type="file"] {
+    display: none;
+}
+
+.cover-upload-button {
+    background-color: rgba(0,123,255,0.8);
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    white-space: nowrap;
+    transition: background-color 0.3s ease;
+    flex-shrink: 0;
+}
+
+.cover-upload-button:hover {
+    background-color: rgba(0,123,255,1);
+}
+
+/* ... (sisa CSS Anda) ... */
+
+
+
+/* Tab Navigation Styles */
+.tab-navigation {
+    display: flex;
+    justify-content: center;
+    background-color: #eee;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.tab-button {
+    background-color: #f1f1f1;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 20px;
+    transition: 0.3s;
+    font-size: 17px;
+    font-weight: 600;
+    color: #555;
+    flex-grow: 1;
+    text-align: center;
+}
+
+.tab-button:hover {
+    background-color: #ddd;
+}
+
+.tab-button.active {
+    background-color: #007bff;
+    color: white;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+}
+
+.tab-content {
+    display: none;
+    padding: 20px 0;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.tab-title {
+    display: none;
+}
+
+
+/* Modal (Pop-up) Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.6);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    padding: 20px;
+    border: 1px solid #888;
+    max-width: 500px;
+    min-width: 300px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+    position: relative;
+    animation-name: animatetop;
+    animation-duration: 0.4s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+@keyframes animatetop {
+    from {top: -300px; opacity: 0}
+    to {top: 0; opacity: 1}
+}
+
+.close-button {
+    color: #aaa;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 2001;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: black;
+    text-decoration: none;
+}
+
+.modal-body {
+    padding: 20px 0;
+    width: 100%;
+}
+
+.modal-profile-pic-container {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid #007bff;
+    margin: 0 auto 15px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-profile-pic-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#modalMechanicName {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+#modalInstructionMessage {
+    font-size: 17px;
+    color: #555;
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+
+#modalBookingService, #modalBookingStatus {
+    font-size: 15px;
+    color: #777;
+    margin-bottom: 5px;
+}
+
+.modal-footer {
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+    width: 100%;
+    text-align: center;
+    margin-top: 20px;
+}
+
+#modalMarkReadBtn {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+#modalMarkReadBtn:hover {
+    background-color: #0056b3;
+}
+
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .hero-text {
+        padding-right: 0;
+        text-align: center;
+    }
+    .hero-text h2 {
+        font-size: 40px;
+    }
+    .hero-illustration {
+        margin-top: 40px;
+        min-width: unset;
+        flex-basis: 100%;
+    }
+    .hero-content {
+        flex-direction: column;
+    }
+    .features-grid {
+        flex-direction: column;
+        align-items: center;
+    }
+    .feature-item {
+        flex-basis: 80%;
+    }
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    th, td {
+        min-width: 120px;
+    }
+
+    /* Dropdown on mobile */
+    .dropdown {
+        display: block;
+        width: 100%;
+        margin-left: 0;
+    }
+    .dropbtn {
+        width: 100%;
+        text-align: center;
+        padding: 10px 0;
+    }
+    .dropdown-content {
+        position: static;
+        box-shadow: none;
+        border-radius: 0;
+        background-color: #eee;
+    }
+    .dropdown-content a {
+        padding-left: 40px;
+    }
+
+    /* Tab navigation on mobile */
+    .tab-navigation {
+        flex-direction: column;
+    }
+    .tab-button {
+        border-bottom: 1px solid #ddd;
+    }
+    .tab-button:last-child {
+        border-bottom: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+    }
+    .nav-links {
+        margin-top: 15px;
+        justify-content: center;
+    }
+    .nav-links li {
+        margin: 0 15px;
+    }
+    .hero-section {
+        padding: 60px 0;
+        min-height: auto;
+    }
+    .hero-text h2 {
+        font-size: 36px;
+    }
+    .btn-primary {
+        padding: 12px 25px;
+        font-size: 18px;
+    }
+    .form-wrapper {
+        padding: 20px 0;
+    }
+    .auth-form-container,
+    .booking-form-container,
+    .admin-register-form-container {
+        padding: 25px;
+        margin: 0 20px;
+    }
+    h1 {
+        font-size: 30px;
+    }
+    h2 {
+        font-size: 24px;
+    }
+    .services-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Responsive Profile & Cover Section */
+    .user-profile-wrapper {
+        height: 200px;
+        margin: 10px auto 20px auto;
+        padding-bottom: 15px;
+    }
+
+    .profile-section {
+        padding: 0 10px;
+        top: 10px;
+        background-color: transparent;
+    }
+    
+    /* profile-info dan profile-upload-form di mobile */
+    .profile-info { /* Tetap flex column di mobile */
+        width: 100%; /* Ambil lebar penuh */
+        margin-bottom: 10px; /* Jarak dari tombol upload */
+    }
+    .profile-pic-container {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid #ffffff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    background-color: white;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    z-index: 3;
+    /* --- PERUBAHAN DI SINI --- */
+    transform: translateY(100px); /* Ini menggeser foto keluar dari bawah sampul */
+    margin-bottom: 0px; /* Ubah ini menjadi 0px */
+    /* --- AKHIR PERUBAHAN --- */
+    }
+    .profile-username {
+        font-size: 20px;
+    }
+    .profile-role {
+        font-size: 14px;
+        margin-left: 0;
+    }
+
+    .profile-upload-form {
+        flex-direction: column; /* Ubah ke kolom lagi di mobile */
+        width: 100%;
+        position: static; /* Kembali ke static flow */
+        margin-top: 0; /* Hapus margin atas */
+        padding: 0;
+        box-sizing: border-box;
+    }
+    .profile-upload-form label,
+    .profile-upload-form input[type="file"],
+    .profile-upload-form button[type="submit"] {
+        width: 100%;
+        min-width: unset;
+        font-size: 12px;
+        padding: 4px;
+    }
+
+    .cover-upload-form {
+        top: 5px;
+        right: 5px;
+        flex-direction: row;
+        gap: 5px;
+    }
+    .cover-upload-label, .cover-upload-button {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-text h2 {
+        font-size: 30px;
+    }
+    .hero-text p {
+        font-size: 16px;
+    }
+    .btn-primary {
+        width: 100%;
+    }
+    .nav-links li {
+        margin: 0 10px;
+    }
+
+    /* Override profile upload form for very small screens */
+    .profile-upload-form {
+        flex-direction: column; /* Stack vertically on very small screens */
+    }
+    .profile-upload-form label.profile-upload-label,
+    .profile-upload-form button.profile-upload-button {
+        width: 100%;
+        min-width: unset;
+    }
+    .cover-upload-form {
+        flex-direction: column;
+        align-items: flex-end;
+    }
+}
